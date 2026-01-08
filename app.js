@@ -9,8 +9,13 @@
 
 /* async function buscarPokemon() {
 
-    const pokeNombre = document.getElementById('pokemon-input').value;
-    const url = "https://pokeapi.co/api/v2/pokemon/"+pokeNombre;
+    let pokeNombre = document.getElementById('pokemon-input').value;
+    let shiny = false;
+    if (pokeNombre.slice(-1) == '*') {
+        pokeNombre = pokeNombre.slice(0, -1);
+        shiny = true;
+    }
+    const url = "https://pokeapi.co/api/v2/pokemon/" + pokeNombre;
 
     try {
         const respuesta = await fetch(url);
@@ -29,7 +34,13 @@
 
         nombre.textContent = pokeJson.name;
         id.textContent = pokeJson.id;
-        sprite.src = pokeJson.sprites.front_default;
+
+        if (shiny) {
+            sprite.src = pokeJson.sprites.front_shiny;
+        } else {
+            sprite.src = pokeJson.sprites.front_default;
+        }
+        
         sprite.style.width = '200px';
 
     } catch (error) {
@@ -39,7 +50,12 @@
 
 /* function buscarPokemon() {
 
-    const pokeNombre = document.getElementById('pokemon-input').value;
+    let pokeNombre = document.getElementById('pokemon-input').value;
+    let shiny = false;
+    if (pokeNombre.slice(-1) == '*') {
+        pokeNombre = pokeNombre.slice(0, -1);
+        shiny = true;
+    }
     const url = "https://pokeapi.co/api/v2/pokemon/" + pokeNombre;
 
     fetch(url)
@@ -56,7 +72,13 @@
 
                 nombre.textContent = pokeJson.name;
                 id.textContent = pokeJson.id;
-                sprite.src = pokeJson.sprites.front_default;
+
+                if(shiny){
+                    sprite.src = pokeJson.sprites.front_shiny;
+                } else{
+                    sprite.src = pokeJson.sprites.front_default;
+                }
+
                 sprite.style.width = '200px';
             }
         )
@@ -75,7 +97,12 @@
 
 function buscarPokemonJQueryAJAX() {
 
-    const pokeNombre = $('#pokemon-input').val();
+    let pokeNombre = $('#pokemon-input').val();
+    let shiny = false;
+    if (pokeNombre.slice(-1) == '*') {
+        pokeNombre = pokeNombre.slice(0, -1);
+        shiny = true;
+    }
     const url = 'https://pokeapi.co/api/v2/pokemon/' + pokeNombre;
 
     $.ajax({
@@ -86,11 +113,17 @@ function buscarPokemonJQueryAJAX() {
             const pokemonData = $('#pokemon-data');
             pokemonData.html('');
 
-            const nombre = $('<p> Nombre: ').text(pokeJson.name);
-            const id = $('<p> ID: ').text(pokeJson.id);
-            const sprite = $('<img>')
-                .attr('src', pokeJson.sprites.front_default)
-                .css('width', '200px');
+            const nombre = $('<p>').text('Nombre: ' + pokeJson.name);
+            const id = $('<p>').text('ID: ' + pokeJson.id);
+            const sprite = $('<img>');
+
+            if (shiny) {
+                sprite.attr('src', pokeJson.sprites.front_shiny);
+
+            } else {
+                sprite.attr('src', pokeJson.sprites.front_default);
+            }
+            sprite.css('width', '200px');
 
             pokemonData.append(nombre, id, sprite);
         },
