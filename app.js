@@ -6,6 +6,7 @@
  * Función para buscar pokemon ejercicio 1 y 2.
  * 
 */
+const coleccion = [];
 
 async function buscarPokemon() {
 
@@ -20,7 +21,7 @@ async function buscarPokemon() {
     try {
         const respuesta = await fetch(url);
         if (!respuesta.ok) {
-            throw new Error(`Estado de la respuesta: ${respuesta.status}`);
+            throw new Error(`No es un Pokémon`);
         }
 
         const pokeJson = await respuesta.json();
@@ -29,12 +30,10 @@ async function buscarPokemon() {
         pokemonData.innerHTML = '';
 
         const nombre = pokemonData.appendChild(document.createElement("p"));
-        const id = pokemonData.appendChild(document.createElement("p"));
         const sprite = pokemonData.appendChild(document.createElement("img"));
         const agregar = pokemonData.appendChild(document.createElement("button"));
 
-        nombre.textContent = pokeJson.name;
-        id.textContent = pokeJson.id;
+        nombre.textContent = `${pokeJson.name} (#${pokeJson.id})`;
 
         if (shiny) {
             sprite.src = pokeJson.sprites.front_shiny;
@@ -43,15 +42,21 @@ async function buscarPokemon() {
         }
         sprite.style.width = '200px';
 
-        agregar.textContent = "Agregar a colección";
+        agregar.textContent = "Agregar a la colección";
         agregar.id = "coleccion-btn";
-        agregar.addEventListener('click', function() {
-            let coleccion;
-            coleccion.push([pokeJson.name,pokeJson.id,pokeJson.sprites.front_default]);
-        })
+        agregar.addEventListener('click', () => {
+            coleccion.push({
+                name: pokeJson.name,
+                id: pokeJson.id,
+                sprite: shiny
+                    ? pokeJson.sprites.front_shiny
+                    : pokeJson.sprites.front_default
+            });
+            alert(`${pokeJson.name} agregado a la colección`);
+        });
 
     } catch (error) {
-        console.error(error.message);
+        buscarPorTipo(pokeNombre);
     }
 }
 
@@ -74,11 +79,9 @@ async function buscarPokemon() {
                 pokemonData.innerHTML = '';
 
                 const nombre = pokemonData.appendChild(document.createElement("p"));
-                const id = pokemonData.appendChild(document.createElement("p"));
                 const sprite = pokemonData.appendChild(document.createElement("img"));
 
-                nombre.textContent = pokeJson.name;
-                id.textContent = pokeJson.id;
+                nombre.textContent = `${pokeJson.name} (#${pokeJson.id})`;
 
                 if(shiny){
                     sprite.src = pokeJson.sprites.front_shiny;
@@ -89,13 +92,13 @@ async function buscarPokemon() {
                 sprite.style.width = '200px';
             }
         )
-        .catch(error => console.error(error));
+        .catch(error => pokemonData.innerHTML = `<p>No es un Pokémon ni un tipo válido</p>`;);
 } */
 
 /**
  *  Descomentar para hacer uso de la función.
  */
-document.getElementById('search-btn').addEventListener('click',buscarPokemon);
+document.getElementById('search-btn').addEventListener('click', buscarPokemon);
 
 
 /**
@@ -120,8 +123,7 @@ document.getElementById('search-btn').addEventListener('click',buscarPokemon);
             const pokemonData = $('#pokemon-data');
             pokemonData.html('');
 
-            const nombre = $('<p>').text('Nombre: ' + pokeJson.name);
-            const id = $('<p>').text('ID: ' + pokeJson.id);
+            const nombre = $('<p>').text(pokeJson.name + ' (#' + pokeJson.id +')');
             const sprite = $('<img>');
 
             if (shiny) {
@@ -132,10 +134,10 @@ document.getElementById('search-btn').addEventListener('click',buscarPokemon);
             }
             sprite.css('width', '200px');
 
-            pokemonData.append(nombre, id, sprite);
+            pokemonData.append(nombre, sprite);
         },
-        error: function (xhr) {
-            console.error(`Estado de la respuesta: ${xhr.status}`);
+        error: function (error) {
+            pokemonData.innerHTML = `<p>No es un Pokémon ni un tipo válido</p>`;
         }
     });
 } */
@@ -145,5 +147,74 @@ document.getElementById('search-btn').addEventListener('click',buscarPokemon);
 */
 /* $(document).ready(function () {
     $('#search-btn').on('click', buscarPokemonJQueryAJAX);
-}); */
+});
+ */
+/**
+ * Mostrar colección
+ */
+document.getElementById('view-collection-btn').addEventListener('click', () => {
+    const collectionList = document.getElementById('collection-list');
+    collectionList.innerHTML = '';
 
+    coleccion.forEach(pokemon => {
+        const card = document.createElement('div');
+
+        const nombre = document.createElement('p');
+        const img = document.createElement('img');
+
+        nombre.textContent = `${pokemon.name} (#${pokemon.id})`;
+        img.src = pokemon.sprite;
+        img.style.width = '100px';
+
+        card.appendChild(nombre);
+        card.appendChild(img);
+        collectionList.appendChild(card);
+    });
+
+    document.getElementById('collection-section').classList.remove('hidden');
+});
+
+/**
+ * Buscar por tipo de pokemon
+ */
+async function buscarPorTipo(tipo) {
+    const pokemonData = document.getElementById('pokemon-data');
+
+    try {
+        const respuesta = await fetch(`https://pokeapi.co/api/v2/type/${tipo}`);
+        if (!respuesta.ok) throw new Error("Tipo no válido");
+
+        const data = await respuesta.json();
+
+        const primerosCinco = data.pokemon.slice(0, 5);
+
+        const promesas = [];
+
+        for (const p of primerosCinco) {
+            const promesa = fetch(p.pokemon.url)
+                .then(res => res.json());
+
+            promesas.push(promesa);
+        }
+
+        const pokemons = await Promise.all(promesas);
+
+        pokemonData.innerHTML = '';
+
+        pokemons.forEach(pokemon => {
+            const card = document.createElement('div');
+            const name = document.createElement('p');
+            const img = document.createElement('img');
+
+            name.textContent = `${pokemon.name} (#${pokemon.id})`;
+            img.src = pokemon.sprites.front_default;
+            img.style.width = '120px';
+
+            card.append(name, img);
+            pokemonData.appendChild(card);
+        });
+
+    } catch (error) {
+        pokemonData.innerHTML = `<p>No es un Pokémon ni un tipo válido</p>`;
+    }
+}
