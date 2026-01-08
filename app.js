@@ -7,7 +7,7 @@
  * 
 */
 
-/* async function buscarPokemon() {
+async function buscarPokemon() {
 
     let pokeNombre = document.getElementById('pokemon-input').value;
     let shiny = false;
@@ -31,6 +31,7 @@
         const nombre = pokemonData.appendChild(document.createElement("p"));
         const id = pokemonData.appendChild(document.createElement("p"));
         const sprite = pokemonData.appendChild(document.createElement("img"));
+        const agregar = pokemonData.appendChild(document.createElement("button"));
 
         nombre.textContent = pokeJson.name;
         id.textContent = pokeJson.id;
@@ -40,13 +41,19 @@
         } else {
             sprite.src = pokeJson.sprites.front_default;
         }
-        
         sprite.style.width = '200px';
+
+        agregar.textContent = "Agregar a colección";
+        agregar.id = "coleccion-btn";
+        agregar.addEventListener('click', function() {
+            let coleccion;
+            coleccion.push([pokeJson.name,pokeJson.id,pokeJson.sprites.front_default]);
+        })
 
     } catch (error) {
         console.error(error.message);
     }
-} */
+}
 
 /* function buscarPokemon() {
 
@@ -88,14 +95,14 @@
 /**
  *  Descomentar para hacer uso de la función.
  */
-//document.getElementById('search-btn').addEventListener('click',buscarPokemon);
+document.getElementById('search-btn').addEventListener('click',buscarPokemon);
 
 
 /**
  * Ejercicio 3: buscar pokemon con JQuery AJAX.
  */
 
-function buscarPokemonJQueryAJAX() {
+/* function buscarPokemonJQueryAJAX() {
 
     let pokeNombre = $('#pokemon-input').val();
     let shiny = false;
@@ -131,14 +138,12 @@ function buscarPokemonJQueryAJAX() {
             console.error(`Estado de la respuesta: ${xhr.status}`);
         }
     });
-
-
-}
+} */
 
 /**
  * Haciendo uso de JQuery, descomentar para usar la función buscarPokemonJQueryAJAX
 */
-$(document).ready(function () {
+/* $(document).ready(function () {
     $('#search-btn').on('click', buscarPokemonJQueryAJAX);
-});
+}); */
 
