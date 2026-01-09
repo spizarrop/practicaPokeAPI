@@ -1,65 +1,71 @@
-
-/**
- * Ejercicio 1: Buscar y mostrar información del Pokemon con FETCH
- */
-/**
- * Función para buscar pokemon ejercicio 1 y 2.
- * 
-*/
+// Variables globales
 const coleccion = [];
 
-async function buscarPokemon() {
-
+/**
+ * Ejercicio 1: Función para buscar pokemon
+ * 
+*/
+/* async function buscarPokemon() {
+    // Obtenemos el nombre del pokemon introducido en el campo de texto
     let pokeNombre = document.getElementById('pokemon-input').value;
+    // Por defecto el pokemon no es shiny (esta parte es mia)
     let shiny = false;
+    // Comprobamos si el nombre del pokemon lleva un * al final para ver si es shiny
     if (pokeNombre.slice(-1) == '*') {
         pokeNombre = pokeNombre.slice(0, -1);
         shiny = true;
     }
+    // Establecemos la url para buscar el pokemon en la API
     const url = "https://pokeapi.co/api/v2/pokemon/" + pokeNombre;
 
     try {
+        // Realizamos un fetch a la API para obtener los datos del Pokemon
         const respuesta = await fetch(url);
+        // Si no se encuentra el nompre del pokemon indicamos el error
         if (!respuesta.ok) {
             throw new Error(`No es un Pokémon`);
         }
 
+        // Guardamos en una variable el json obtenido con la llamada a la API
         const pokeJson = await respuesta.json();
 
+        // Obtenemos mediante DOM el div donde mostraremos el pokemon
         const pokemonData = document.getElementById('pokemon-data');
+        // Lo vaciamos por si contiene algun pokemon de otra busqueda
         pokemonData.innerHTML = '';
 
+        // Creamos los hijos necesarios para el div anterior para el nombre e imagen del pokemon, asi como un botón para agregarlo a la coleccion
         const nombre = pokemonData.appendChild(document.createElement("p"));
         const sprite = pokemonData.appendChild(document.createElement("img"));
         const agregar = pokemonData.appendChild(document.createElement("button"));
 
+        // Establecemos el nombre del pokemon y su id
         nombre.textContent = `${pokeJson.name} (#${pokeJson.id})`;
 
+        // Para la imagen mostramos la correspondiente dependiendo si es shiny o no
         if (shiny) {
             sprite.src = pokeJson.sprites.front_shiny;
         } else {
             sprite.src = pokeJson.sprites.front_default;
         }
+        // Establecemos el ancho de la imagen
         sprite.style.width = '200px';
 
+        // Declaramos el nombre del botón y su id
         agregar.textContent = "Agregar a la colección";
         agregar.id = "coleccion-btn";
-        agregar.addEventListener('click', () => {
-            coleccion.push({
-                name: pokeJson.name,
-                id: pokeJson.id,
-                sprite: shiny
-                    ? pokeJson.sprites.front_shiny
-                    : pokeJson.sprites.front_default
-            });
-            alert(`${pokeJson.name} agregado a la colección`);
-        });
+        // Agregamos un event listener al botón para agregar el pokemon (objeto) al array de colección
+        agregar.addEventListener('click', () => agregarColeccion(pokeJson));
 
     } catch (error) {
+        // Si no se trata de un pokemon podria tratarse del tipo de pokemon, por lo que llamamos al método de busqueda por tipo
         buscarPorTipo(pokeNombre);
     }
-}
+} */
 
+/**
+ * Ejercicio 2: Integración de promesas en el ejercicio 1
+ */
 /* function buscarPokemon() {
 
     let pokeNombre = document.getElementById('pokemon-input').value;
@@ -83,29 +89,34 @@ async function buscarPokemon() {
 
                 nombre.textContent = `${pokeJson.name} (#${pokeJson.id})`;
 
-                if(shiny){
+                if (shiny) {
                     sprite.src = pokeJson.sprites.front_shiny;
-                } else{
+                } else {
                     sprite.src = pokeJson.sprites.front_default;
                 }
 
                 sprite.style.width = '200px';
+
+                // Declaramos el nombre del botón y su id
+                agregar.textContent = "Agregar a la colección";
+                agregar.id = "coleccion-btn";
+                // Agregamos un event listener al botón para agregar el pokemon (objeto) al array de colección
+                agregar.addEventListener('click', () => agregarColeccion(pokeJson));
             }
         )
-        .catch(error => pokemonData.innerHTML = `<p>No es un Pokémon ni un tipo válido</p>`;);
+        .catch(error => buscarPorTipo(pokeNombre));
 } */
 
 /**
  *  Descomentar para hacer uso de la función.
  */
-document.getElementById('search-btn').addEventListener('click', buscarPokemon);
+/* document.getElementById('search-btn').addEventListener('click', buscarPokemon); */
 
 
 /**
  * Ejercicio 3: buscar pokemon con JQuery AJAX.
  */
-
-/* function buscarPokemonJQueryAJAX() {
+function buscarPokemonJQueryAJAX() {
 
     let pokeNombre = $('#pokemon-input').val();
     let shiny = false;
@@ -123,8 +134,9 @@ document.getElementById('search-btn').addEventListener('click', buscarPokemon);
             const pokemonData = $('#pokemon-data');
             pokemonData.html('');
 
-            const nombre = $('<p>').text(pokeJson.name + ' (#' + pokeJson.id +')');
+            const nombre = $('<p>').text(pokeJson.name + ' (#' + pokeJson.id + ')');
             const sprite = $('<img>');
+            const agregar = $('<button>').attr('id', 'coleccion-btn').text('Agregar');
 
             if (shiny) {
                 sprite.attr('src', pokeJson.sprites.front_shiny);
@@ -134,21 +146,39 @@ document.getElementById('search-btn').addEventListener('click', buscarPokemon);
             }
             sprite.css('width', '200px');
 
-            pokemonData.append(nombre, sprite);
+            pokemonData.append(nombre, sprite, agregar);
+
+            // Agregamos un event listener al botón para agregar el pokemon (objeto) al array de colección
+            agregar.addEventListener('click', () => agregarColeccion(pokeJson));
         },
         error: function (error) {
-            pokemonData.innerHTML = `<p>No es un Pokémon ni un tipo válido</p>`;
+            buscarPorTipo(pokeNombre);
         }
     });
-} */
+}
 
 /**
  * Haciendo uso de JQuery, descomentar para usar la función buscarPokemonJQueryAJAX
 */
-/* $(document).ready(function () {
+$(document).ready(function () {
     $('#search-btn').on('click', buscarPokemonJQueryAJAX);
 });
+
+/**
+ * Función para agregar un pokemon a la coleción
  */
+function agregarColeccion(pokeJson) {
+    coleccion.push({
+        name: pokeJson.name,
+        id: pokeJson.id,
+        sprite: shiny
+            ? pokeJson.sprites.front_shiny
+            : pokeJson.sprites.front_default
+    });
+    // Mostramos una alerta cuando se agrege el pokemon a la colección
+    alert(`${pokeJson.name} agregado a la colección`);
+}
+
 /**
  * Mostrar colección
  */
